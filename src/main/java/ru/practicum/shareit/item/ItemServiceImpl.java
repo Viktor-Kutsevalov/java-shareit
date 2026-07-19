@@ -30,20 +30,27 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(Long userId, Long itemId, ItemDto itemDto) {
         Item existing = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь с id " + itemId + " не найдена"));
+
         if (existing.getOwner() == null || !existing.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Пользователь с id " + userId + " не является владельцем вещи " + itemId);
         }
-        if (itemDto.getName() != null) {
-            existing.setName(itemDto.getName());
-        }
-        if (itemDto.getDescription() != null) {
-            existing.setDescription(itemDto.getDescription());
-        }
-        if (itemDto.getAvailable() != null) {
-            existing.setAvailable(itemDto.getAvailable());
-        }
+
+        updateItemFields(existing, itemDto);
+
         Item updated = itemRepository.save(existing);
         return ItemMapper.toItemDto(updated);
+    }
+
+    private void updateItemFields(Item item, ItemDto dto) {
+        if (dto.getName() != null) {
+            item.setName(dto.getName());
+        }
+        if (dto.getDescription() != null) {
+            item.setDescription(dto.getDescription());
+        }
+        if (dto.getAvailable() != null) {
+            item.setAvailable(dto.getAvailable());
+        }
     }
 
     @Override

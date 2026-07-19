@@ -47,15 +47,21 @@ public class UserServiceImpl implements UserService {
             if (userRepository.existsByEmailAndIdNot(userDto.getEmail(), id)) {
                 throw new ConflictException("Пользователь с email " + userDto.getEmail() + " уже существует");
             }
-            existing.setEmail(userDto.getEmail());
         }
 
-        if (userDto.getName() != null) {
-            existing.setName(userDto.getName());
-        }
+        updateUserFields(existing, userDto);
 
         User updated = userRepository.save(existing);
         return UserMapper.toUserDto(updated);
+    }
+
+    private void updateUserFields(User user, UserDto dto) {
+        if (dto.getName() != null) {
+            user.setName(dto.getName());
+        }
+        if (dto.getEmail() != null) {
+            user.setEmail(dto.getEmail());
+        }
     }
 
     @Override
