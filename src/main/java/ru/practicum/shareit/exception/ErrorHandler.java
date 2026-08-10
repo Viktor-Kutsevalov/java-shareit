@@ -33,4 +33,10 @@ public class ErrorHandler {
     public Map<String, String> handleOther(Throwable e) {
         return Map.of("error", "Произошла непредвиденная ошибка.");
     }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleForbidden(ForbiddenException e) {
+        return Map.of("error", e.getMessage());
+    }
 }
