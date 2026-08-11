@@ -1,6 +1,6 @@
 package ru.practicum.shareit.request;
 
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemForRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -25,8 +25,8 @@ public class ItemRequestMapper {
         dto.setDescription(request.getDescription());
         dto.setCreated(request.getCreated());
         if (request.getItems() != null) {
-            List<ItemDto> itemDtos = request.getItems().stream()
-                    .map(item -> new ItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable()))
+            List<ItemForRequestDto> itemDtos = request.getItems().stream()
+                    .map(item -> new ItemForRequestDto(item.getId(), item.getName(), item.getOwner().getId()))
                     .collect(Collectors.toList());
             dto.setItems(itemDtos);
         }

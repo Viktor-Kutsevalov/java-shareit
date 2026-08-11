@@ -57,11 +57,21 @@ public class ItemServiceImpl implements ItemService {
         if (!item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Пользователь не является владельцем вещи");
         }
-        if (request.getName() != null) item.setName(request.getName());
-        if (request.getDescription() != null) item.setDescription(request.getDescription());
-        if (request.getAvailable() != null) item.setAvailable(request.getAvailable());
+        updateItemFields(item, request);
         log.info("Обновлена вещь {} пользователем {}", itemId, userId);
         return ItemMapper.toItemDto(itemRepository.save(item));
+    }
+
+    private void updateItemFields(Item item, ItemUpdateRequest request) {
+        if (request.getName() != null) {
+            item.setName(request.getName());
+        }
+        if (request.getDescription() != null) {
+            item.setDescription(request.getDescription());
+        }
+        if (request.getAvailable() != null) {
+            item.setAvailable(request.getAvailable());
+        }
     }
 
     @Override
@@ -83,7 +93,8 @@ public class ItemServiceImpl implements ItemService {
         log.debug("Получена информация о вещи {} для пользователя {}", itemId, userId);
         return new ItemExtendedDto(
                 item.getId(), item.getName(), item.getDescription(),
-                item.getAvailable(), lastBooking, nextBooking, comments
+                item.getAvailable(), lastBooking, nextBooking,
+                comments != null ? comments : Collections.emptyList()  // гарантируем не-null
         );
     }
 
@@ -162,7 +173,6 @@ public class ItemServiceImpl implements ItemService {
         comment.setItem(item);
         comment.setAuthor(author);
         comment.setCreated(now);
-        log.info("Добавлен комментарий к вещи {} от пользователя {}", itemId, userId);
         return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 

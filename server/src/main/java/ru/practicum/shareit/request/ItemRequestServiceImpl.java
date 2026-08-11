@@ -1,10 +1,9 @@
 package ru.practicum.shareit.request;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -24,6 +23,7 @@ import java.util.stream.Collectors;
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestRepository requestRepository;
     private final UserRepository userRepository;
+    private final EntityManager entityManager;
 
     @Override
     public ItemRequestDto create(Long userId, ItemRequestCreateDto dto) {
@@ -50,9 +50,18 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional(readOnly = true)
     public List<ItemRequestDto> getOtherRequests(Long userId, Integer from, Integer size) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-        int page = from / size;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "created"));
-        List<ItemRequest> requests = requestRepository.findAllByRequestorIdNot(userId, pageable);
+
+        String jpql = "SELECT DISTINCT r FROM ItemRequest r " +
+                "LEFT JOIN FETCH r.items i " +
+                "WHERE r.requestor.id != :userId " +
+                "ORDER BY r.created DESC";
+
+        TypedQuery<ItemRequest> query = entityManager.createQuery(jpql, ItemRequest.class);
+        query.setParameter("userId", userId);
+        query.setFirstResult(from);
+        query.setMaxResults(size);
+
+        List<ItemRequest> requests = query.getResultList();
         log.info("Получены чужие запросы для пользователя {} (from={}, size={})", userId, from, size);
         return requests.stream()
                 .map(ItemRequestMapper::toItemRequestDto)

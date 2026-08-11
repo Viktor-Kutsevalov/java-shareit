@@ -9,6 +9,8 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemCreateRequest;
 import ru.practicum.shareit.item.dto.ItemUpdateRequest;
 
+import static ru.practicum.shareit.constant.Headers.USER_ID;
+
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -17,14 +19,14 @@ public class ItemController {
     private final ItemClient itemClient;
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> create(@RequestHeader(USER_ID) Long userId,
                                          @Valid @RequestBody ItemCreateRequest request) {
         log.info("Создание вещи для пользователя {}: {}", userId, request);
         return itemClient.createItem(userId, request);
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> update(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> update(@RequestHeader(USER_ID) Long userId,
                                          @PathVariable Long itemId,
                                          @RequestBody ItemUpdateRequest request) {
         log.info("Обновление вещи {} для пользователя {}", itemId, userId);
@@ -32,14 +34,14 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<Object> get(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> get(@RequestHeader(USER_ID) Long userId,
                                       @PathVariable Long itemId) {
         log.info("Получение вещи {} для пользователя {}", itemId, userId);
         return itemClient.getItem(userId, itemId);
     }
 
     @GetMapping
-    public ResponseEntity<Object> getOwn(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<Object> getOwn(@RequestHeader(USER_ID) Long userId) {
         log.info("Получение всех вещей пользователя {}", userId);
         return itemClient.getItemsByOwner(userId);
     }
@@ -51,7 +53,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public ResponseEntity<Object> addComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ResponseEntity<Object> addComment(@RequestHeader(USER_ID) Long userId,
                                              @PathVariable Long itemId,
                                              @Valid @RequestBody CommentDto commentDto) {
         log.info("Добавление комментария к вещи {} от пользователя {}", itemId, userId);
